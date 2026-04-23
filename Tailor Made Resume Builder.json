@@ -1,0 +1,125 @@
+{
+  "name": "Tailor Made Resume Builder",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/tailor-resume",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryPropertyName": "data0"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dd580769-73d4-4942-b55e-3ce59d5b4b5c",
+      "name": "Webhook",
+      "webhookId": "ABC123"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Resume: {{ $json.body.resumeText }}\nJob Description: {{ $json.body.jobDescription }}",
+        "options": {
+          "systemMessage": "You are Tailor Made AI, a resume optimization assistant whose single goal is to rewrite resumes so they pass applicant-tracking-system (ATS) scans and impress human recruiters.\nWhen I give you:\n﻿﻿ORIGINAL_RESUME (plain text)\n﻿﻿JOB_DESCRIPTION (plain text)\nreturn a new, plain-text resume that obeys every rule below.\n\n- ATS-SAFETY RULES -\n﻿﻿1. ﻿No tables, columns, graphics, text boxes, or multiple columns. ATS parsers drop them :contentReference[oaicite:0] {index=0}\n﻿﻿﻿2. No PDF-specific layout tags or Markdown/HTML. Output pure ASCII.\n﻿﻿﻿3. Use standard section headers in this order (all caps):\n CONTACT • SUMMARY • SKILLS • EXPERIENCE • EDUCATION • CERTIFICATIONS\n- KEYWORD & CONTENT RULES -\n4. Target ≥ 80% keyword match with the JOB_DESCRIPTION content Reference[oaicite:1] {index=1}\n﻿﻿- Insert each missing, relevant hard skill exactly once.\n﻿﻿- Never stuff a keyword; keep flow natural.\n5. ﻿﻿﻿Preserve every factual achievement; never invent employment or metrics.\n6. ﻿﻿﻿Quantify results where the ORIGINAL already implies scope (e.g., Increased revenue 15%\"): contentReference [oaicite:2] {index=2}\nIf a bullet lacks numbers and you don't know them, leave it unchanged.\n7. Replace buzzwords (e.g., team player, results-driven) with concrete verbs and metrics content Reference [oaicite:3] {index=3}.\n\nFORMATTING RULES -\n8. Bullet character must be (Unicode U+2022).\n• Each bullet ≤ 22 words.\n9. ﻿﻿﻿Dates remain in the same month-year format as ORIGINAL.\n10. ﻿﻿﻿﻿Keep résumé ≤ 2,500 words.\n- OUTPUT STRUCTURE -\nReturn only the rewritten résumé, no commentary.\nDo NOT wrap in code fences.\nIf you are unsure about a fact, leave the line unchanged and append [verify].\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9406d904-6e7d-48b3-97f8-491d2ebb8590",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "3fa31061-201e-4f92-99f2-8a0493fe4412",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        208
+      ],
+      "id": "03266e1f-6bf8-445d-bfc0-7d535516095e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "ABC123",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "10f37e85-4128-497c-bb44-dbcdf90bd753",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e920e803337ccb006417df06998f22547a4cdb7e86302ff8a4763cbfc755fcc"
+  },
+  "id": "mWnCSB25GEZSeBzN",
+  "tags": []
+}
